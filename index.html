@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="app">
+      <input type="text" v-model="school.name" />
+      {{school.name}}
+      <!-- 如果数据不变化 视图就不会刷新 -->
+      {{getNewName}}
+      <!-- 我们在内部会匹配{{}} 调用computed方法 执行方法会取值 会添加watcher -->
+      <div>{{school.name}}</div>
+      <div>{{school.age}}</div>
+      <ul>
+          <li>1</li>
+          <li>2</li>
+          <li>3</li>
+          <li>4</li>
+      </ul>
+      <button v-on:click="change">更新操作</button>
+      <div v-html="message"></div>
+    </div>
+    <!-- <script src="./node_modules/vue/dist/vue.js"></script> -->
+    <script src="MVVM.js"></script>
+    <script>
+      let vm = new Vue({
+        el: '#app',
+        data: {
+          school: {
+            name: 'OBKoro1',
+            age: 25,
+          },
+          message: '<h1>欢迎大家</h1>'
+        },
+        computed: {
+            getNewName(){
+                return this.school.name + '新名字'
+            }
+        },
+        methods: {
+            change(){
+                this.school.name = 'koro1'
+            }
+        },
+      })
+    </script>
+  </body>
+</html>
