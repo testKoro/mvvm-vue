@@ -1,3 +1,5 @@
-# my-vue
+# mvvm-vue
 
-珠峰/vue全家桶/mvvm原理手写
+vue mvvm 原理手写
+
+<!-- 珠峰/vue全家桶 -->
