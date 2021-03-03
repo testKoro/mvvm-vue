@@ -84,7 +84,7 @@ class Observer {
       },
       set: (newValue) => {
         if (value !== newValue) {
-          this.observer(newValue)
+          this.observer(newValue) // 如果新值是对象 就重新劫持
           value = newValue
           dep.notify() // 数据变化 发布更新
         }
@@ -93,11 +93,33 @@ class Observer {
   }
 }
 
-// 被观察者 发布订阅
-// 调用方法
-// vm.$watch(vm, 'school.name', (newVal) =>{
+// TODO: 如何把watcher添加到订阅池Dep中
+// 1. 数据劫持的时候 每个数据都会单独拥有一个Dep实例 用于后续的订阅池容器和更新订阅池
+//  	let dep = new Dep() // 给每一个属性都加上一个具有发布订阅的功能
+// 2.  在编译html模板的时候 如果元素使用了data数据就将数据转化为成value  读取数据过程中会new watcher 
+//     // 给输入框加入一个观察者
+//     new Watcher(vm, expr, (newVal) => {
+//       // 稍后数据更新了 会触发回调 拿到新值 更新输入框
+//       fn(node, newVal)
+//     })
+// 3.  new watcher之后 会设置Deple类的target为当前watcher 然后取一次watcher的data的值 取data的值会转到数据劫持的get回调中
+//     Dep.target = this // 把watcher添加到Dep.target上
+//     // 取值的时候 判断有target 将它添加到Dep实例化的观察者中
+//     let value = CompileUtil.getVal(this.vm, this.expr)
 
-// })
+// 4.  在data的数据劫持过程中 如果判断类Dep.target有值 则 将Dep.target 也就是watcher添加到订阅池中
+
+//       get() {
+//         // 创建watcher时 会取到对应的内容 把这个watcher放到全局上 根据有没有target判断是否在初始化watcher
+//         Dep.target && dep.addSub(Dep.target) // 给观察者添加watcher
+//         return value
+//       },
+
+// 5. 因为这个过程是同步的 所以将当前Dep.target（watcher）添加到订阅池之后，会回到watcher取data值之后的操作中 将Dep.target重置为null，等待下次new watcher 添加实例
+
+//     Dep.target = null // 添加完watcher即取消 target 等待下一次添加watcher
+
+
 class Watcher {
   constructor(vm, expr, cb) {
     this.vm = vm
@@ -111,14 +133,14 @@ class Watcher {
     Dep.target = this // 把watcher添加到Dep.target上
     // 取值的时候 判断有target 将它添加到Dep实例化的观察者中
     let value = CompileUtil.getVal(this.vm, this.expr)
-    Dep.target = null // 添加完watcher即取消 target
+    Dep.target = null // 添加完watcher即取消 target 等待下一次添加watcher
     return value
   }
   // 数据变化后调用观察者的update方法
   update() {
     let newVal = this.get()
     if (newVal !== this.oldVal) {
-      this.cb(newVal)
+      this.cb(newVal) // 调用watcher时的回调 更新html模板
     }
   }
 }
